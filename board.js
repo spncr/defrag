@@ -6,7 +6,7 @@ class Board {
     this.h = windowHeight/scale
     this.cell = new Cell()
     this.calculateSize()
-    this.cells = this.getFreshCells(this.size)
+    this.cells = this.getFreshCells(this.rows * this.columns)
   }
   
   draw(){
@@ -34,22 +34,21 @@ class Board {
   onResize() {
     this.w = windowWidth/this.scale
     this.h = windowHeight/this.scale
-    let old_size = this.size
+    const OLD_SIZE = this.cells.length
     this.calculateSize()
-    if (old_size > this.size) {
-      let amount_to_delete = this.old_size - this.size
-      this.cells.splice(this.size - amount_to_delete, amount_to_delete)
-    } else if (old_size < this.size) {
-      let amount_to_generate = this.size - old_size
+    const NEW_SIZE = this.rows * this.columns
+    if (OLD_SIZE > NEW_SIZE) {
+      let amount_to_delete = OLD_SIZE - NEW_SIZE
+      this.cells.splice(NEW_SIZE)
+    } else if (NEW_SIZE > OLD_SIZE) {
+      let amount_to_generate = NEW_SIZE - OLD_SIZE
       this.cells = this.cells.concat(this.getFreshCells(amount_to_generate))
     }
-
   }
   
   calculateSize(){
     this.columns = Math.floor((this.w - 12) / 8)
     this.rows = Math.floor((this.h - 12) / 10 + 1)
-    this.size = this.rows * this.columns
   }
   
   fillCells() {
@@ -70,7 +69,6 @@ class Board {
           return 'belongs'
         }
     })
-    console.log("fresh cells:", cells)
     return cells
   }
   
