@@ -1,6 +1,6 @@
 let cell 
 let board
-const SCALE = 8
+const SCALE = 4
 
 function setup() {
   createCanvas(windowWidth, windowHeight)
@@ -12,10 +12,9 @@ function setup() {
 function draw() {
   scale(SCALE)
   board.draw()
-  scale(1/SCALE)
 }
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight)
-  board.onResize()
+  board.onResize(SCALE)
 }

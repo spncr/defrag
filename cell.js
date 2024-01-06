@@ -3,15 +3,8 @@ class Cell {
   constructor() {
     this.position = 1
   }
-  //cell.draw(1,  1, 'free')
-  //cell.draw(1, 11, 'optimized')
-  //cell.draw(1, 22, 'belongs')
-  //cell.draw(1, 33, 'read')
-  //cell.draw(1, 44, 'write')
-  
+
   draw(x, y, type = 'free') {
-    noStroke()
-    
     if (type == 'free') {
       fill('white')
       rect(x, y, 7, 9)
@@ -44,7 +37,7 @@ class Cell {
       else if (type == 'write') {
         fill('red')
         this.drawColor(x,y)
-      } 
+      }
       else if (type == 'stuck') {
         fill ('white')
         this.drawColor(x,y)
