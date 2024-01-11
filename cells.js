@@ -1,12 +1,40 @@
 class Cells {
+  cell
+  cells
+  cursor
 
   constructor(amount){
     this.cell = new Cell()
     this.cells = this.getFreshCells(amount)
+    this.cursor = 0
+    drawCell()
   }
 
   get length() {
     return this.cells.length
+  }
+
+  getCell(index) {
+    return this.cells[index]
+  }
+
+  setCell(index, value){
+    this.cells[index] = value
+  }
+
+  step() {
+    if (this.cursor < this.length) {
+      let currentCell = this.getCell(this.cursor)
+
+      if (currentCell == 'belongs') {
+        this.setCell(this.cursor, 'optimized')
+      }
+
+      this.cursor ++
+    } else {
+      this.cells = this.getFreshCells(this.length)
+      this.cursor = 0
+    }
   }
 
   getFreshCells(amount) {
@@ -14,7 +42,7 @@ class Cells {
       {length: amount}, 
       () => {
         let roll = Math.floor(Math.random()*101)
-        if (roll > 98){
+        if (roll > 98) {
           return 'stuck'
         } else if (roll > 90) {
           return 'free'
@@ -33,17 +61,19 @@ class Cells {
       // extend it to size
       this.cells = this.cells.concat(this.getFreshCells(size - this.length))
     }
-    console.log(this.length)
   }
 
   draw(columns, rows) {
-    for (let column = 1; column <= columns; column++) {
-      for (let row = 1; row <= rows; row++){
-        this.cell.draw(
-          column * 8 - 1, 
-          row * 10 - 3, 
-          this.cells[row * column - 1])
-      }
+    for (let i = 0; i < this.length; i ++){
+      let column = i % columns + 1
+      let row = Math.floor( i / columns) + 1
+      let x = column * 8 - 1
+      let y = row * 10 - 3
+      this.cell.draw(x, y, this.cells[i])
     }
   }
+}
+
+function drawCell(){
+  console.log('oh yeah')
 }

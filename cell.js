@@ -1,9 +1,5 @@
 class Cell {
   
-  constructor() {
-    this.position = 1
-  }
-
   draw(x, y, type = 'free') {
     if (type == 'free') {
       fill('white')
