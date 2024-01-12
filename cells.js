@@ -1,17 +1,20 @@
 class Cells {
-  cell
   cells
-  cursor
-
-  constructor(amount){
-    this.cell = new Cell()
-    this.cells = this.getFreshCells(amount)
-    this.cursor = 0
-    drawCell()
+  cursor = 0
+  #cellStates = {
+    unoptimized : 'unoptimized',
+    optimized : 'optimized',
+    ignored : 'ignored',
+    read : 'read',
+    write : 'write'
   }
 
   get length() {
     return this.cells.length
+  }
+
+  constructor(amount){
+    this.cells = this.getFreshCells(amount)
   }
 
   getCell(index) {
@@ -26,8 +29,8 @@ class Cells {
     if (this.cursor < this.length) {
       let currentCell = this.getCell(this.cursor)
 
-      if (currentCell == 'belongs') {
-        this.setCell(this.cursor, 'optimized')
+      if (currentCell == this.#cellStates.unoptimized) {
+        this.setCell(this.cursor, this.#cellStates.optimized)
       }
 
       this.cursor ++
@@ -43,11 +46,11 @@ class Cells {
       () => {
         let roll = Math.floor(Math.random()*101)
         if (roll > 98) {
-          return 'stuck'
-        } else if (roll > 90) {
-          return 'free'
+          return this.#cellStates.ignored
+        } else if (roll > 10) {
+          return this.#cellStates.unoptimized
         } else {
-          return 'belongs'
+          return
         }
     })
     return cells
@@ -55,10 +58,8 @@ class Cells {
 
   resize(size){
     if (this.length > size) {
-      // cut it down to size
       this.cells = this.cells.slice(0, size)
     } else if (this.length < size) {
-      // extend it to size
       this.cells = this.cells.concat(this.getFreshCells(size - this.length))
     }
   }
@@ -69,11 +70,50 @@ class Cells {
       let row = Math.floor( i / columns) + 1
       let x = column * 8 - 1
       let y = row * 10 - 3
-      this.cell.draw(x, y, this.cells[i])
+      this.#drawCell(x, y, this.cells[i])
     }
   }
-}
 
-function drawCell(){
-  console.log('oh yeah')
+  #drawCell (x, y, state) {
+    if (state) {
+      //outline
+      fill('black')
+      rect(x, y, 7, 9)
+      
+      switch (state){
+        case this.#cellStates.unoptimized:
+          this.#fillCell(x, y, 'cyan')
+          break
+        case this.#cellStates.optimized:
+          this.#fillCell(x, y, 'cyan')
+          fill('blue')
+          for (let i = 1; i <= 5; i++) {
+            for (let j = 1; j <= 7; j++) {
+              if ((i + j) % 2 == 0) { square(x + i, y + j, 1) }
+            }
+          }
+          break
+        case this.#cellStates.read:
+          this.#fillCell(x, y, 'lime')
+          break
+        case this.#cellStates.write:
+          this.#fillCell(x,y, 'red')
+          break
+        case this.#cellStates.ignored:
+          this.#fillCell(x, y, 'white')
+          fill ('black')
+          rect (x + 3, y + 1, 3)
+          fill ('red')
+          rect (x + 5, y, 2)
+          rect (x + 4, y + 1, 1)
+          rect (x + 5, y + 2, 1)
+          break
+      }
+    }
+  }
+
+  #fillCell (x, y, color = "purple") {
+    fill(color)
+    rect(x + 1, y + 1, 5, 7)
+  }
 }
