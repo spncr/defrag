@@ -10,7 +10,7 @@ class Board {
     this.#h = windowHeight/scale
     this.#columns = Math.floor((this.#w - 12) / 8)
     this.#rows = Math.floor((this.#h - 12) / 10 + 1)
-    
+
     this.cells = new Cells(this.#columns * this.#rows)
   }
 
@@ -21,7 +21,7 @@ class Board {
     clip(()=>{
       rect(7, this.#h - 6, this.#w, 6)
     }, { invert: true })
-    this.cells.draw(this.#columns, this.#rows)
+    this.cells.draw(this.#columns)
     pop()
   }
 
