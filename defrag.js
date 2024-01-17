@@ -1,11 +1,11 @@
 let board
-const SCALE = 8
+const SCALE = 2
 
 function setup() {
   createCanvas(windowWidth, windowHeight)
   pixelDensity(1)
   board = new Board(SCALE)
-  frameRate(4)
+  frameRate(30)
 }
 
 function draw() {

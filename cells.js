@@ -56,12 +56,12 @@ class Cells {
         
         if (this.stepState === 'crawl'){
           this.stepState === 'read'
-          this.batchSize = Math.floor(Math.random() * 30 + 3)
+          this.batchSize = Math.floor(Math.random() * 5 + 3)
           let cursor = this.cursor
           
           if (this.hitIgnored) {
             cursor = this.hitIgnored  + 1
-            this.batchSize = this.hitIgnored - this.cursor
+            this.batchSize = Math.min(this.hitIgnored - this.cursor, 5)
             delete this.hitIgnored
           }
 
@@ -74,6 +74,10 @@ class Cells {
               this.hitIgnored = cursor
             }
             cursor ++
+            if (cursor >= this.length) {
+              this.resetBoard()
+              this.batchSize = this.clipboard.length
+            }
           }
           this.setCells(this.clipboard, this.#cellStates.read)
           this.stepState = 'delete'
@@ -95,10 +99,8 @@ class Cells {
       // console.log('state: ', this.stepState, ' @ ', this.cursor, ' clipboards length is ', this.clipboard.length)
 
     } else {
-      this.cells = this.getFreshCells(this.length)
-      this.cursor = 0
+      this.resetBoard()
     }
-
   }
 
   getFreshCells(amount) {
@@ -123,6 +125,11 @@ class Cells {
     } else if (this.length < size) {
       this.cells = this.cells.concat(this.getFreshCells(size - this.length))
     }
+  }
+
+  resetBoard(){
+    this.cells = this.getFreshCells(this.length)
+    this.cursor = 0
   }
 
   draw(columns) {
