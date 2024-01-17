@@ -55,6 +55,7 @@ class Cells {
     if (this.cursor < this.length) {
       switch (this.stepState) {
         case this.#stepStates.crawl:
+          frameRate(10)
           let currentCell = this.getCell(this.cursor)
 
           if (currentCell === this.#cellStates.unoptimized) {
@@ -68,7 +69,9 @@ class Cells {
           break
 
         case this.#stepStates.read:
-          this.batchSize = Math.floor(Math.random() * 5 + 3)
+          frameRate(2)
+
+          this.batchSize = Math.floor(Math.random() * 20 + 3)
           let cursor = this.cursor
           
           if (this.hitIgnored) {
@@ -96,11 +99,13 @@ class Cells {
           break
 
         case this.#stepStates.clear:
+          frameRate(10)
           this.setCells(this.clipboard)
           this.stepState = this.#stepStates.write
           break
 
         case this.#stepStates.write:
+          frameRate(1)
           this.setCellRange(
             this.cursor, 
             this.cursor + this.clipboard.length, 
@@ -109,6 +114,7 @@ class Cells {
           break
 
         case this.#stepStates.resume:
+          frameRate(6)
           this.setCellRange(
             this.cursor, 
             this.cursor + this.clipboard.length, 
