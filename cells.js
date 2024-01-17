@@ -14,6 +14,14 @@ class Cells {
     write : 'write',
   }
 
+  #stepStates = {
+    crawl : 'crawl',
+    read : 'read',
+    clear : 'clear',
+    write : 'write',
+    resume: 'resume'
+  }
+
   get length() {
     return this.cells.length
   }
@@ -45,17 +53,21 @@ class Cells {
 
   step() {
     if (this.cursor < this.length) {
-      let currentCell = this.getCell(this.cursor)
+      switch (this.stepState) {
+        case this.#stepStates.crawl:
+          let currentCell = this.getCell(this.cursor)
 
-      if (currentCell === this.#cellStates.unoptimized) {
-        this.setCell(this.cursor, this.#cellStates.optimized)
-        this.cursor ++
-      } else if (currentCell === this.#cellStates.ignore){
-        this.cursor ++
-      } else if (!currentCell || this.stepState === 'resume' ){
-        
-        if (this.stepState === 'crawl'){
-          this.stepState === 'read'
+          if (currentCell === this.#cellStates.unoptimized) {
+            this.setCell(this.cursor, this.#cellStates.optimized)
+            this.cursor ++
+          } else if (currentCell === this.#cellStates.ignore){
+            this.cursor ++
+          } else {
+            this.stepState = this.#stepStates.read
+          }
+          break
+
+        case this.#stepStates.read:
           this.batchSize = Math.floor(Math.random() * 5 + 3)
           let cursor = this.cursor
           
@@ -80,24 +92,31 @@ class Cells {
             }
           }
           this.setCells(this.clipboard, this.#cellStates.read)
-          this.stepState = 'delete'
-        } else if (this.stepState === 'delete') {
+          this.stepState = this.#stepStates.clear
+          break
+
+        case this.#stepStates.clear:
           this.setCells(this.clipboard)
-          this.stepState = 'write'
-        } else if (this.stepState === 'write') {
-          this.setCellRange(this.cursor, this.cursor + this.clipboard.length, this.#cellStates.write)
-          this.stepState = 'resume'
-        } else if (this.stepState === 'resume') {
+          this.stepState = this.#stepStates.write
+          break
+
+        case this.#stepStates.write:
+          this.setCellRange(
+            this.cursor, 
+            this.cursor + this.clipboard.length, 
+            this.#cellStates.write)
+          this.stepState = this.#stepStates.resume
+          break
+
+        case this.#stepStates.resume:
           this.setCellRange(
             this.cursor, 
             this.cursor + this.clipboard.length, 
             this.#cellStates.unoptimized)
           this.clipboard = []
-          this.stepState = 'crawl'
-        }
+          this.stepState = this.#stepStates.crawl
+          break
       }
-      // console.log('state: ', this.stepState, ' @ ', this.cursor, ' clipboards length is ', this.clipboard.length)
-
     } else {
       this.resetBoard()
     }
