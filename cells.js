@@ -1,10 +1,14 @@
+const MAX_BATCH = 20
+const MIN_BATCH = 3
+
 class Cells {
   cells
   cursor = 0
   clipboard = []
   stepState = 'crawl'
   batchSize
-  hitIgnored
+  nextIgnored
+  lastIgnored
 
   #cellStates = {
     unoptimized : 'unoptimized',
@@ -55,7 +59,7 @@ class Cells {
     if (this.cursor < this.length) {
       switch (this.stepState) {
         case this.#stepStates.crawl:
-          frameRate(10)
+          frameRate(30)
           let currentCell = this.getCell(this.cursor)
 
           if (currentCell === this.#cellStates.unoptimized) {
@@ -71,14 +75,19 @@ class Cells {
         case this.#stepStates.read:
           frameRate(2)
 
-          this.batchSize = Math.floor(Math.random() * 20 + 3)
-          let cursor = this.cursor
-          
-          if (this.hitIgnored) {
-            cursor = this.hitIgnored  + 1
-            this.batchSize = Math.min(this.hitIgnored - this.cursor, 5)
-            delete this.hitIgnored
-          }
+          this.batchSize = Math.floor(Math.random() * (MAX_BATCH - MIN_BATCH + 1) + MIN_BATCH)
+          let cursor = this.cursor + 1
+
+          if (this.cursor > this.nextIgnored) delete this.nextIgnored
+          if (this.cursor > this.lastIgnored) delete this.lastIgnored
+
+          if (this.lastIgnored && this.nextIgnored) {
+            cursor = this.lastIgnored + 1
+            this.batchSize = Math.min(this.nextIgnored - this.cursor, MAX_BATCH)
+          } else if (this.nextIgnored) {
+            cursor = this.nextIgnored  + 1
+            this.batchSize = Math.min(this.nextIgnored - this.cursor, MAX_BATCH)
+          }  
 
           while (this.clipboard.length < this.batchSize) {
             let cell = this.getCell(cursor)
@@ -86,7 +95,8 @@ class Cells {
               this.clipboard.push(cursor)
             } else if (cell === this.#cellStates.ignore) {
               this.batchSize = this.clipboard.length
-              this.hitIgnored = cursor
+              if (!this.nextIgnored) this.nextIgnored = cursor
+              else this.lastIgnored = cursor
             }
             cursor ++
             if (cursor >= this.length) {
@@ -94,6 +104,7 @@ class Cells {
               this.batchSize = this.clipboard.length
             }
           }
+
           this.setCells(this.clipboard, this.#cellStates.read)
           this.stepState = this.#stepStates.clear
           break
