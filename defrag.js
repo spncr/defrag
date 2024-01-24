@@ -8,7 +8,6 @@ function setup() {
 }
 
 function draw() {
-  board.cells.step()
   scale(SCALE)
   board.draw()
 }

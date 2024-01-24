@@ -1,4 +1,4 @@
-const MAX_BATCH = 20
+const MAX_BATCH = 8
 const MIN_BATCH = 3
 
 class Cells {
@@ -9,6 +9,8 @@ class Cells {
   batchSize
   nextIgnored
   lastIgnored
+  rowsUntilreset
+  cellsPerRow
 
   #cellStates = {
     unoptimized : 'unoptimized',
@@ -23,7 +25,8 @@ class Cells {
     read : 'read',
     clear : 'clear',
     write : 'write',
-    resume: 'resume'
+    resume: 'resume',
+    reset: 'reset',
   }
 
   get length() {
@@ -55,8 +58,10 @@ class Cells {
     }
   }
 
-  step() {
+  step(rows) {
+    let reset = false
     if (this.cursor < this.length) {
+      console.log(this.stepState)
       switch (this.stepState) {
         case this.#stepStates.crawl:
           frameRate(30)
@@ -76,14 +81,18 @@ class Cells {
           frameRate(2)
 
           this.batchSize = Math.floor(Math.random() * (MAX_BATCH - MIN_BATCH + 1) + MIN_BATCH)
+          
           let cursor = this.cursor + 1
 
-          if (this.cursor > this.nextIgnored) delete this.nextIgnored
-          if (this.cursor > this.lastIgnored) delete this.lastIgnored
+          if (this.cursor >= this.nextIgnored) delete this.nextIgnored
+          if (this.cursor >= this.lastIgnored || this.lastIgnored === this.nextIgnored) delete this.lastIgnored
 
           if (this.lastIgnored && this.nextIgnored) {
             cursor = this.lastIgnored + 1
-            this.batchSize = Math.min(this.nextIgnored - this.cursor, MAX_BATCH)
+            this.batchSize = Math.min(
+              this.nextIgnored - this.cursor, 
+              this.lastIgnored - this.nextIgnored, 
+              this.batchSize)
           } else if (this.nextIgnored) {
             cursor = this.nextIgnored  + 1
             this.batchSize = Math.min(this.nextIgnored - this.cursor, MAX_BATCH)
@@ -98,11 +107,12 @@ class Cells {
               if (!this.nextIgnored) this.nextIgnored = cursor
               else this.lastIgnored = cursor
             }
-            cursor ++
             if (cursor >= this.length) {
-              this.resetBoard()
+              reset = true
+              this.cursor = this.length
               this.batchSize = this.clipboard.length
             }
+            cursor ++
           }
 
           this.setCells(this.clipboard, this.#cellStates.read)
@@ -133,10 +143,21 @@ class Cells {
           this.clipboard = []
           this.stepState = this.#stepStates.crawl
           break
+
+        case this.#stepStates.reset:
+          console.log('hi from reset')
+          const LEN = this.length
+          this.cells = this.cells.slice(this.cellsPerRow)
+          this.cells = this.cells.concat(this.getFreshCells(this.cellsPerRow))
+          this.rowsUntilreset --
+          if (this.length != LEN) console.log("error in reset state")
+          if (this.rowsUntilreset <= 0) this.stepState = this.#stepStates.crawl
+          break
       }
     } else {
-      this.resetBoard()
+      reset = true
     }
+    if (reset) this.resetBoard(rows)
   }
 
   getFreshCells(amount) {
@@ -163,9 +184,15 @@ class Cells {
     }
   }
 
-  resetBoard(){
-    this.cells = this.getFreshCells(this.length)
-    this.cursor = 0
+  resetBoard(rows){
+    this.rowsUntilreset = rows
+    this.cellsPerRow = Math.floor(this.length / rows)
+    this.stepState = this.#stepStates.reset
+    console.log('rows until reset: ', this.rowsUntilreset, ' cells per row: ', this.cellsPerRow)
+    // this.cells = this.getFreshCells(this.length)
+    this.cursor= 0
+    delete this.nextIgnored
+    delete this.lastIgnored
   }
 
   draw(columns) {

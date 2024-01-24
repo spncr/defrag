@@ -15,6 +15,7 @@ class Board {
   }
 
   draw() {
+    this.cells.step(this.#rows)
     noStroke()
     this.drawFrame()
     push()
