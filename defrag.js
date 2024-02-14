@@ -1,18 +1,36 @@
 let board
-const SCALE = 2
+
+let size = 2
 
 function setup() {
   createCanvas(windowWidth, windowHeight)
   pixelDensity(1)
-  board = new Board(SCALE)
+  board = new Board(windowWidth, windowHeight, size)
 }
 
 function draw() {
-  scale(SCALE)
+  scale(size)
   board.draw()
 }
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight)
-  board.onResize(SCALE)
+  board.onResize(windowWidth, windowHeight, size)
+}
+
+function keyPressed(){
+  togglePause()
+}
+
+function touchEnded() {
+  togglePause()
+}
+
+function mouseReleased() {
+  togglePause()
+  return false
+}
+
+function togglePause(){
+  board.pause = !board.pause
 }

@@ -61,7 +61,6 @@ class Cells {
   step(rows) {
     let reset = false
     if (this.cursor < this.length) {
-      console.log(this.stepState)
       switch (this.stepState) {
         case this.#stepStates.crawl:
           frameRate(30)
@@ -145,6 +144,7 @@ class Cells {
           break
 
         case this.#stepStates.reset:
+          frameRate(30)
           console.log('hi from reset')
           const LEN = this.length
           this.cells = this.cells.slice(this.cellsPerRow)
@@ -188,7 +188,6 @@ class Cells {
     this.rowsUntilreset = rows
     this.cellsPerRow = Math.floor(this.length / rows)
     this.stepState = this.#stepStates.reset
-    console.log('rows until reset: ', this.rowsUntilreset, ' cells per row: ', this.cellsPerRow)
     // this.cells = this.getFreshCells(this.length)
     this.cursor= 0
     delete this.nextIgnored

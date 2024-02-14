@@ -1,0 +1,7 @@
+- [ ] add some options
+	- [ ] palettes
+	- [ ] speed
+	- [ ] scale
+  - [ ] full screen
+- [ ] improve pause menu
+  - [ ] help, once options above exist
